@@ -32,7 +32,7 @@ public class PersonController {
     }
 
     @GetMapping("/new")
-    public String newPerson(@ModelAttribute("newPerson") Person person) {
+    public String newFormPerson(@ModelAttribute("newPerson") Person person) {
         return "people/new";
     }
 
@@ -48,7 +48,7 @@ public class PersonController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editPerson(Model model, @PathVariable("id") int id) {
+    public String editFormPerson(Model model, @PathVariable("id") int id) {
         model.addAttribute("oldPerson", personDAO.personById(id));
         return "people/edit";
     }
