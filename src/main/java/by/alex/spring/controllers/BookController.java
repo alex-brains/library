@@ -2,6 +2,7 @@ package by.alex.spring.controllers;
 
 import by.alex.spring.dao.BookDAO;
 import by.alex.spring.models.Book;
+import by.alex.spring.utils.BookValidator;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/books")
 public class BookController {
     private final BookDAO bookDAO;
+    private final BookValidator validator;
 
     @Autowired
-    public BookController(BookDAO bookDAO) {
+    public BookController(BookDAO bookDAO, BookValidator validator) {
         this.bookDAO = bookDAO;
+        this.validator = validator;
     }
 
     @GetMapping
@@ -39,6 +42,8 @@ public class BookController {
     @PostMapping
     public String createBook(@ModelAttribute("newBook") @Valid Book book,
                          BindingResult bindingResult) {
+        validator.validate(book, bindingResult);
+
         if (bindingResult.hasErrors()) {
             return "books/new";
         }
@@ -57,6 +62,8 @@ public class BookController {
     public String updateBook(@ModelAttribute("oldBook") @Valid Book book,
                          BindingResult bindingResult,
                          @PathVariable("id") int id) {
+        validator.validate(book, bindingResult);
+
         if (bindingResult.hasErrors()) {
             return "books/edit";
         }
