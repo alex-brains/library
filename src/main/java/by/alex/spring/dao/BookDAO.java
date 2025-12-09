@@ -1,6 +1,7 @@
 package by.alex.spring.dao;
 
 import by.alex.spring.models.Book;
+import by.alex.spring.models.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,12 +30,6 @@ public class BookDAO {
                 .stream().findAny().orElse(null);
     }
 
-    public Optional<Book> bookByName(String bookName) {
-        return jdbcTemplate.query("SELECT * FROM book WHERE book_name=?", new Object[]{bookName},
-                new BeanPropertyRowMapper<>(Book.class))
-                .stream().findAny();
-    }
-
     public void save(Book book) {
         jdbcTemplate.update("INSERT INTO book(book_name, author, year) VALUES (?, ?, ?)",
                 book.getBookName(), book.getAuthor(), book.getYear());
@@ -47,5 +42,29 @@ public class BookDAO {
 
     public void delete(int id) {
         jdbcTemplate.update("DELETE FROM book WHERE id=?", id);
+    }
+
+    public Optional<Book> bookByName(String bookName) {
+        return jdbcTemplate.query("SELECT * FROM book WHERE book_name=?", new Object[]{bookName},
+                        new BeanPropertyRowMapper<>(Book.class))
+                .stream().findAny();
+    }
+
+    // Join'им таблицы book и person и получаем человека, которому принадлежит книга с указанным id
+    public Optional<Person> getBookOwner(int id) {
+        // Выбираем все колонки person из объединенной таблицы
+        return jdbcTemplate.query("SELECT p.* FROM book b JOIN person p ON b.person_id = p.id WHERE b.id=?",
+                        new Object[]{id}, new BeanPropertyRowMapper<>(Person.class))
+                .stream().findAny();
+    }
+
+    // Освобождает книгу (когда человек возвращает книгу в библиотеку)
+    public void release(int id) {
+        jdbcTemplate.update("UPDATE book SET person_id = NULL WHERE id=?", id);
+    }
+
+    // Назначает книгу человеку (когда человек забирает книгу из библиотеки)
+    public void assign(int id, Person selectedPerson) {
+        jdbcTemplate.update("UPDATE book SET person_id=? WHERE id=?", selectedPerson.getId(), id);
     }
 }

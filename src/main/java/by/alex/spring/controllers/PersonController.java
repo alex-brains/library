@@ -31,6 +31,7 @@ public class PersonController {
     @GetMapping("/{id}")
     public String personById(@PathVariable("id") int id, Model model) {
         model.addAttribute("personById", personDAO.personById(id));
+        model.addAttribute("books", personDAO.getBooksByPersonId(id));
         return "people/personById";
     }
 
